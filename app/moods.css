@@ -1,0 +1,130 @@
+
+/* ===== Design tokens used by the moods and the Design Lab (components/DesignLab.tsx) =====
+   Defaults reproduce the classic look, so nothing changes until a mood or the Lab sets them. */
+:root {
+  --r-card: 16px; --r-ctl: 12px; --bw: 1.5px;
+  --shadow: none; --glass: 100%; --blur: 0px;
+  --btn-bd: var(--ac);
+  --app-bg: var(--bg);
+  /* Artwork: a full-height photo behind the page, and a sculpture motif at the top. */
+  --hero: none; --hero-op: 0; --hero-op-hero: 0; --hero-size: cover; --hero-pos: center; --hero-mask: none;
+  --sculpt: none; --sculpt-op: 0; --sculpt-op-hero: 0;
+}
+html[data-metal='gold'][data-theme] { --sculpt: url(/art/sentinel-gold.webp); }
+html[data-metal='silver'][data-theme='light'] { --sculpt: url(/art/sentinel-silver.webp); }
+html[data-metal='silver'][data-theme='dark'] { --sculpt: url(/art/sentinel-silver-dark.webp); }
+
+/* ===== Artwork layers (rendered by Shell in components/ui.tsx) ===== */
+.art-h { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%, 430px); z-index: -1; pointer-events: none;
+  background: var(--hero) var(--hero-pos) / var(--hero-size) no-repeat; opacity: var(--hero-op);
+  -webkit-mask-image: var(--hero-mask); mask-image: var(--hero-mask); }
+.art-s { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%, 430px); pointer-events: none; z-index: 0;
+  background: var(--sculpt) 46% center / auto 100% no-repeat; opacity: var(--sculpt-op); }
+.app.hero .art-h { opacity: var(--hero-op-hero); }
+.app.hero .art-s { position: absolute; transform: none; left: 0; bottom: auto; width: 100%; height: 620px; background-position: left -130px top 70px; background-size: 125% auto; opacity: var(--sculpt-op-hero); }
+.sc, .wl { position: relative; z-index: 1; }
+.app { background: var(--app-bg); }
+
+/* Glass: cards, bars and sheets follow the card colour at --glass opacity. */
+.card, .tabs, .maphd, .spc { background: color-mix(in srgb, var(--sf) var(--glass), transparent); -webkit-backdrop-filter: blur(var(--blur)); backdrop-filter: blur(var(--blur)); }
+.card, .sheet, .mapsheet, .spc { border-radius: var(--r-card); box-shadow: var(--shadow); }
+.btn { border: var(--bw) solid var(--btn-bd); border-radius: var(--r-ctl); }
+.btn.s { border: var(--bw) solid var(--ctl); }
+input[type='text'], input[type='email'], input[type='search'], textarea, select { border-radius: var(--r-ctl); }
+.maphd { background: color-mix(in srgb, var(--bg) var(--glass), transparent); }
+
+/* ===== Welcome and sign-up layout (app/welcome/page.tsx) ===== */
+.wl { padding: 20px 20px 40px; display: flex; flex-direction: column; gap: 14px; }
+.wl-card, .wl-top, .wl-form { display: flex; flex-direction: column; gap: 14px; }
+.wl-card { gap: 18px; }
+/* Sculpture moods: the sculpture sits left, the intro text beside it, the form below. */
+:is([data-mood='sentinel-gold'], [data-mood='sentinel-silver']) .wl-top { margin-left: 36%; min-height: 330px; }
+:is([data-mood='sentinel-gold'], [data-mood='sentinel-silver']) .wl-card { margin-top: 12px; }
+/* Photo moods: the form sits in a card over the photo. */
+:is([data-mood='immersive'], [data-mood='postcard']) .wl-card { margin-top: 64px; padding: 22px 20px; border-radius: 26px;
+  background: color-mix(in srgb, var(--sf) 84%, transparent); border: var(--bw) solid var(--ln);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 18px 50px rgb(0 0 0 / 16%); }
+[data-mood='postcard'] .wl-card { margin-top: 110px; }
+.wl-step { display: flex; gap: 10px; align-items: center; }
+.wl-step .n { width: 28px; height: 28px; flex: none; border-radius: 50%; border: var(--bw) solid var(--ctl); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+
+/* ===== Moods. Each sets colours, shape and artwork for light and dark. Dark falls back to the
+   classic dark map colours for anything not set here. ===== */
+
+/* A. Golden Sentinel: warm, local, premium. */
+[data-mood='sentinel-gold'][data-theme='light'] {
+  --bg:#FFF7EB; --sf:#FFFDF8; --ink:#183A3D; --i2:#3F5C5F; --i3:#52696B;
+  --ac:#C23B25; --onac:#FFF7EB; --ln:#E3D2AE; --ctl:#8A7A58; --mk:#D4AF37; --calm:#DCE9E3; --sun:#F4D888;
+  --r-card:20px; --shadow:0 8px 28px rgb(24 59 62 / 7%);
+  --sculpt:url(/art/sentinel-gold.webp); --glass:90%; --blur:6px; --sculpt-op:.16; --sculpt-op-hero:1;
+}
+[data-mood='sentinel-gold'][data-theme='dark'] {
+  --bg:#0B2E2E; --sf:#123C3C; --ink:#FFF7EB; --i2:#D3DFDA; --i3:#A9BEB9;
+  --ac:#D4AF37; --onac:#0B2E2E; --ln:#2A5A58; --ctl:#6F9895; --mk:#D4AF37;
+  --sea:#082323; --land:#143838; --beach:#2A5A58; --road:#235050;
+  --r-card:20px; --shadow:0 8px 28px rgb(0 0 0 / 25%);
+  --sculpt:url(/art/sentinel-gold.webp); --glass:90%; --blur:6px; --sculpt-op:.16; --sculpt-op-hero:.95;
+}
+
+/* B. Hout Bay Immersive: the sculpture photograph behind frosted cards. */
+[data-mood='immersive'][data-theme='light'] {
+  --bg:#DCE8E6; --app-bg:transparent; --sf:#FFFFFF; --glass:72%; --blur:14px; --ink:#13343A; --i2:#32535A; --i3:#486167;
+  --ac:#C23B25; --onac:#FFF7EB; --ln:#C3D6D4; --ctl:#6A8888; --mk:#F1634D; --calm:#C9E3DD; --sun:#F8CD62;
+  --r-card:22px; --shadow:0 10px 30px rgb(10 40 45 / 12%);
+  --hero:url(/art/immersive-water.jpg); --hero-op:.42; --hero-op-hero:1;
+}
+[data-mood='immersive'][data-theme='dark'] {
+  --bg:#0B2E2E; --app-bg:transparent; --sf:#0E3A3E; --glass:64%; --blur:14px; --ink:#FFF7EB; --i2:#D3DFDA; --i3:#A9BEB9;
+  --ac:#F1634D; --onac:#0B2E2E; --ln:#2F6366; --ctl:#6F9895; --mk:#F1634D;
+  --sea:#082323; --land:#143838; --beach:#2A5A58; --road:#235050;
+  --r-card:22px; --shadow:0 10px 30px rgb(0 0 0 / 30%);
+  --hero:url(/art/immersive-water.jpg); --hero-op:.3; --hero-op-hero:.9;
+}
+
+/* C. Silver Sculpture: modern, artistic, understated. */
+[data-mood='sentinel-silver'][data-theme='light'] {
+  --bg:#F7F5F0; --sf:#FFFFFF; --ink:#183A3D; --i2:#3F5C5F; --i3:#52696B;
+  --ac:#C23B25; --onac:#FFF7EB; --ln:#D3DADC; --ctl:#7B8A8E; --mk:#8FA0A6; --calm:#DCE7E6; --sun:#F4D888;
+  --r-card:20px; --shadow:0 8px 28px rgb(24 59 62 / 7%);
+  --sculpt:url(/art/sentinel-silver.webp); --glass:90%; --blur:6px; --sculpt-op:.16; --sculpt-op-hero:1;
+}
+[data-mood='sentinel-silver'][data-theme='dark'] {
+  --bg:#0F2A2D; --sf:#16393C; --ink:#FFF7EB; --i2:#D3DFDA; --i3:#A9BEB9;
+  --ac:#D5DDE0; --onac:#0B2E2E; --ln:#2F5558; --ctl:#7C9A9D; --mk:#C0CCD0;
+  --sea:#0A1F21; --land:#16393C; --beach:#2F5558; --road:#26484B;
+  --r-card:20px; --shadow:0 8px 28px rgb(0 0 0 / 25%);
+  --sculpt:url(/art/sentinel-silver-dark.webp); --glass:90%; --blur:6px; --sculpt-op:.16; --sculpt-op-hero:.95;
+}
+
+/* D. Local Postcard: the Hout Bay dusk photograph, open and friendly. */
+[data-mood='postcard'][data-theme='light'] {
+  --bg:#FBF3E8; --sf:#FFFBF4; --ink:#183A3D; --i2:#3F5C5F; --i3:#52696B;
+  --ac:#C23B25; --onac:#FFF7EB; --ln:#E6D6BF; --ctl:#857660; --mk:#F29C50; --calm:#CFE6E0; --sun:#F8CD62;
+  --r-card:22px; --shadow:0 10px 30px rgb(60 40 20 / 10%);
+  --hero:url(/img/site/welcome.jpg); --hero-size:100% 430px; --hero-pos:center top;
+  --hero-mask:linear-gradient(#000 45%, transparent 100%); --hero-op:.28; --hero-op-hero:1;
+}
+[data-mood='postcard'][data-theme='dark'] {
+  --bg:#14203A; --sf:#1B2B4D; --ink:#FFF7EB; --i2:#D5DCEB; --i3:#A9B6D2;
+  --ac:#F6A15B; --onac:#14203A; --ln:#2F4470; --ctl:#7088B5; --mk:#F6A15B; --calm:#B8DDD3;
+  --sea:#0F1A31; --land:#1B2B4D; --beach:#2F4470; --road:#2B3E66;
+  --r-card:22px; --shadow:0 10px 30px rgb(0 0 0 / 30%);
+  --hero:url(/img/site/welcome.jpg); --hero-size:100% 430px; --hero-pos:center top;
+  --hero-mask:linear-gradient(#000 45%, transparent 100%); --hero-op:.4; --hero-op-hero:1;
+}
+
+/* ===== Design Lab panel. Fixed colours on purpose, so it stays readable whatever the look. ===== */
+.lab-fab { position: fixed; right: 12px; bottom: calc(96px + env(safe-area-inset-bottom)); z-index: 90; min-width: 52px; min-height: 44px; padding: 0 14px; border-radius: 22px; border: 2px solid #fff; background: #111; color: #fff; font: 700 14px 'Figtree', sans-serif; cursor: pointer; box-shadow: 0 4px 14px rgb(0 0 0 / 35%); }
+.lab { position: fixed; right: 8px; bottom: calc(148px + env(safe-area-inset-bottom)); z-index: 90; width: min(340px, calc(100% - 16px)); max-height: calc(100dvh - 170px); overflow-y: auto; background: #111; color: #fff; border: 2px solid #fff; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
+.lab p, .lab-note { color: #c9c9c9; font-size: 13px; }
+.lab-sec { display: flex; flex-direction: column; gap: 8px; }
+.lab-sec > b { font-size: 14px; }
+.lab-row { display: grid; grid-template-columns: 1fr 96px 64px; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; }
+.lab-row code { font: 600 12px 'Source Code Pro', monospace; color: #c9c9c9; }
+.lab-row input[type='color'] { width: 96px; min-height: 36px; padding: 0; border: 1.5px solid #fff; border-radius: 8px; background: none; }
+.lab-row input[type='range'] { width: 96px; min-height: 0; padding: 0; border: 0; background: none; }
+.lab select, .lab-row select { min-height: 38px; background: #222; color: #fff; border: 1.5px solid #888; border-radius: 8px; font-size: 14px; padding: 0 8px; width: 100%; }
+.lab-seg { display: flex; gap: 6px; }
+.lab-seg button, .lab-act button { flex: 1; min-height: 40px; border-radius: 8px; border: 1.5px solid #888; background: transparent; color: #fff; font: 600 14px 'Figtree', sans-serif; cursor: pointer; }
+.lab-seg button.on { background: #fff; color: #111; border-color: #fff; }
+.lab-act { display: flex; gap: 8px; }

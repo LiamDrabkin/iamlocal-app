@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Back, Shell } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { visibleThemes } from '@/lib/themes';
+import { MOODS } from '@/lib/moods';
 import { useApp, type Local } from '@/lib/store';
 
 /** Platforms a member could link. Mock-up only: linking just records the choice. */
@@ -37,8 +38,30 @@ export default function Settings() {
           </div>
         )}
         <div className="card">
-          <h2>Theme</h2>
-          <button className={`tog ${s.theme === 'system' ? 'on' : ''}`} style={{ minHeight: 48 }} aria-pressed={s.theme === 'system'} onClick={() => set({ theme: 'system' })}>
+          <h2>Look</h2>
+          <div className="tgrid" role="group" aria-label="Look">
+            {MOODS.map((m) => {
+              const dark = s.theme === 'dark' || (s.theme !== 'light' && s.theme !== 'system' && visibleThemes.find((t) => t.id === s.theme)?.mode === 'dark');
+              const sw = dark ? m.swatch.dark : m.swatch.light;
+              return (
+                <button key={m.id} className={s.mood === m.id ? 'on' : ''} aria-pressed={s.mood === m.id} onClick={() => set({ mood: m.id, ...(s.theme !== 'system' && s.theme !== 'light' && s.theme !== 'dark' ? { theme: 'system' as const } : {}) })}>
+                  <span className="dots" aria-hidden="true">{sw.map((c) => <i key={c} style={{ background: c }} />)}</span>
+                  <b>{m.name}</b><span className="sm">{m.note}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="row" role="group" aria-label="Mode" style={{ gap: 8 }}>
+            {(['system', 'light', 'dark'] as const).map((m) => (
+              <button key={m} className={`tog ${s.theme === m ? 'on' : ''}`} style={{ minHeight: 48, flex: 1 }} aria-pressed={s.theme === m} onClick={() => set({ theme: m })}>
+                {m === 'system' ? 'Phone' : m === 'light' ? 'Light' : 'Dark'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="card">
+          <h2>Classic themes</h2>
+          <button className={`tog ${s.theme === 'system' ? 'on' : ''}`} style={{ minHeight: 48 }} aria-pressed={s.theme === 'system'} onClick={() => set({ theme: 'system', mood: 'classic' })}>
             {s.theme === 'system' ? 'Following my phone (light and dark)' : 'Follow my phone instead'}
           </button>
           {([['Light', 'light', false], ['Dark', 'dark', false], ['Experiments (off-brand, for discussion)', null, true]] as const).map(([title, mode, exp]) => {
@@ -49,7 +72,7 @@ export default function Settings() {
               <div className="tgrid" role="group" aria-label={title}>
                 {list.map((t) => (
                   <button key={t.id} className={s.theme === t.id ? 'on' : ''} aria-pressed={s.theme === t.id}
-                    onClick={() => set(t.mode === 'dark' ? { theme: t.id, darkPick: t.id } : { theme: t.id, lightPick: t.id })}>
+                    onClick={() => set(t.mode === 'dark' ? { theme: t.id, darkPick: t.id, mood: 'classic' } : { theme: t.id, lightPick: t.id, mood: 'classic' })}>
                     <span className="dots" aria-hidden="true">{t.swatch.map((c) => <i key={c} style={{ background: c }} />)}</span>
                     <b>{t.name}</b><span className="sm">{t.note}</span>
                   </button>

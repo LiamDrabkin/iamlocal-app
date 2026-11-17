@@ -10,13 +10,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useAuth } from './auth';
 import { loadUserState, saveUserState } from './userState';
 import type { Visit } from './visits';
-import { DEFAULT_DARK, DEFAULT_LIGHT, resolveTheme, type ThemeId } from './themes';
+import { DEFAULT_DARK, DEFAULT_LIGHT, resolveLook, type ThemeId } from './themes';
+import { DEFAULT_MOOD, isMood, type MoodId } from './moods';
 import { ME, type AppData, type Person, type Post, type Review, type Venue } from './types';
 
 const KEY = 'ial-demo-v2';
 
 export interface Local {
   theme: ThemeId | 'system' | 'light' | 'dark'; // 'light'/'dark' are legacy saved values
+  mood: MoodId; // redesign look (lib/moods.ts); 'classic' keeps the original themes
   lightPick: ThemeId; // used when following the phone, and for legacy 'light'
   darkPick: ThemeId;
   following: string[]; // people
@@ -41,6 +43,7 @@ export interface Local {
 
 const DEFAULTS: Local = {
   theme: 'system',
+  mood: DEFAULT_MOOD,
   lightPick: DEFAULT_LIGHT,
   darkPick: DEFAULT_DARK,
   following: ['ana', 'daria', 'craig', 'james', 'mischelle', 'aedan', 'philip'],
@@ -145,15 +148,17 @@ export function AppProvider({ data, children }: { data: AppData; children: React
     if (!ready) return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const apply = () => {
-      const { id, mode } = resolveTheme(s, mq.matches);
-      document.documentElement.dataset.theme = mode;
-      document.documentElement.dataset.skin = id;
+      const { mood, mode, skin } = resolveLook({ ...s, mood: isMood(s.mood) ? s.mood : DEFAULT_MOOD }, mq.matches);
+      const el = document.documentElement;
+      el.dataset.theme = mode;
+      el.dataset.mood = mood;
+      if (skin) el.dataset.skin = skin; else delete el.dataset.skin;
     };
     apply();
     if (s.theme !== 'system') return;
     mq.addEventListener('change', apply);
     return () => mq.removeEventListener('change', apply);
-  }, [s.theme, s.lightPick, s.darkPick, ready]);
+  }, [s.theme, s.mood, s.lightPick, s.darkPick, ready]);
 
   const set = useCallback((patch: Partial<Local>) => setS((p) => ({ ...p, ...patch })), []);
   const flip: Ctx['flip'] = useCallback((key, id) => setS((p) => ({ ...p, [key]: p[key].includes(id) ? p[key].filter((x) => x !== id) : [...p[key], id] })), []);
