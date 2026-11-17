@@ -163,3 +163,16 @@ label { font-size: 13px; font-weight: 700; }
 .tgrid button.on { border: 3px solid var(--ink); }
 .dots { display: flex; gap: 4px; }
 .dots i { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--ctl); }
+
+/* Real map (MapLibre). The canvas fills the box; pins are an overlay that lets the map take drags between them. */
+.rcanvas.maplibregl-map, .rcanvas { position: absolute !important; inset: 0; }
+.rpins { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.rpins .pinw { pointer-events: auto; left: 0; top: 0; will-change: transform; }
+.rmap .pin2 img { width: var(--pin, 52px); height: var(--pin, 52px); }
+.rpins.nonames .pinw:not(.sel) .pn { display: none; }
+.rmap .maplibregl-ctrl-attrib { font-size: 13px; }
+/* Dark themes: the OpenFreeMap style is light, so invert the tiles only. Pins are not inside the canvas. */
+[data-theme='dark'] .rmap .maplibregl-canvas { filter: invert(1) hue-rotate(180deg) saturate(.55) brightness(.85) contrast(.9); }
+
+/* Pin editor panel (map branches, /map?edit=1) */
+.rpanel { position: absolute; top: 8px; right: 8px; z-index: 6; width: 190px; background: var(--bg); border: 2px solid var(--ink); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
