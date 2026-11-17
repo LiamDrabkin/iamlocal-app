@@ -125,7 +125,6 @@ export default function MapSurface({ venues, sel, onSelect, hereBy }: MapSurface
   }, [venues, ready, settled, place, edit]);
 
   return (
-<<<<<<< HEAD
     <div className="mapbox rmap" style={{ ['--pin' as string]: `${size.img}px` } as React.CSSProperties}>
       <div ref={holder} className="rcanvas" />
       {edit && (
@@ -173,26 +172,6 @@ export default function MapSurface({ venues, sel, onSelect, hereBy }: MapSurface
           })}
         </div>
       )}
-=======
-    <div className="mapbox" onClick={() => onSelect(null)}>
-      <MapBase />
-      {venues.map((v) => {
-        const people = hereBy.get(v.id) ?? [];
-        const p = pos.get(v.id) ?? { x: v.x, y: v.y };
-        return (
-          <div key={v.id} className={`pinw ${v.id === sel ? 'sel' : ''}`} style={{ left: `${(p.x / MAP.w) * 100}%`, top: `${(p.y / MAP.h) * 100}%` }}>
-            <button className="pin2" aria-pressed={v.id === sel} aria-label={`${v.name}, ${CAT_LABEL[v.cat]}${people.length ? `, ${people.length} people you follow are here` : ''}`}
-              onClick={(e) => { e.stopPropagation(); onSelect(v.id === sel ? null : v.id); }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={pinImg(v)} alt="" />
-              <span className="pn">{v.name}</span>
-            </button>
-            {people.length > 0 && <div className="pst"><FaceStack ids={people} popover /></div>}
-          </div>
-        );
-      })}
-      <p className="sm" style={{ position: 'absolute', left: 12, bottom: 8, right: 12, zIndex: 1, color: 'var(--i3)' }}>Stylised map. Positions approximate. Faces are people you follow who chose to share.</p>
->>>>>>> dev
     </div>
   );
 }
