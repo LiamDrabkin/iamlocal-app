@@ -1,0 +1,86 @@
+{
+  "w": {
+    "lat": -34.042575,
+    "lng": 18.359401,
+    "match": "Main Road, Berg-en Dal Estate, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "37 Main Road, Hout Bay"
+  },
+  "l": {
+    "lat": -34.050021,
+    "lng": 18.345812,
+    "match": "The Lookout Deck, Harbour Road, The Spinnaker, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "The Lookout Deck, Hout Bay, Cape Town"
+  },
+  "f": {
+    "lat": -34.047914,
+    "lng": 18.347628,
+    "match": "Hout Bay Yacht Club, Harbour Road, The Spinnaker, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "Harbour Road, Hout Bay Harbour, Hout Bay"
+  },
+  "m": {
+    "lat": -34.047914,
+    "lng": 18.347628,
+    "match": "Hout Bay Yacht Club, Harbour Road, The Spinnaker, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "Harbour Rd, Hout Bay Harbour, Hout Bay"
+  },
+  "h": {
+    "lat": -34.045878,
+    "lng": 18.356106,
+    "match": "Hout Bay Beach, Hanging Meadow, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, South Africa",
+    "query": "Hout Bay Beach, Hout Bay, Cape Town"
+  },
+  "x": {
+    "lat": -34.019174,
+    "lng": 18.375277,
+    "match": "Massimo's, Hout Bay Main Road, Oakhurst, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "Massimo's, Hout Bay, Cape Town"
+  },
+  "c": {
+    "lat": -34.043729,
+    "lng": 18.359219,
+    "match": "Cheyne's, Main Road, Hanging Meadow, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "Cheyne's, Hout Bay, Cape Town"
+  },
+  "y": {
+    "lat": -34.042575,
+    "lng": 18.359401,
+    "match": "Main Road, Berg-en Dal Estate, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "4080 Main Road, Hout Bay"
+  },
+  "o": {
+    "lat": -34.047159,
+    "lng": 18.361752,
+    "match": "Chapman's Peak Beach Hotel, Chapman's Peak Drive, Hanging Meadow, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "Chapman's Peak Hotel, Hout Bay, Cape Town"
+  },
+  "v": {
+    "lat": -34.017845,
+    "lng": 18.362946,
+    "match": "Valley Road, Kronendal Retirement Village, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "Valley Road, Hout Bay"
+  },
+  "z": {
+    "lat": -34.046765,
+    "lng": 18.361012,
+    "match": "The Beach Bar, The Promenade, Hanging Meadow, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "Beach Bar, Hout Bay, Cape Town"
+  },
+  "q": {
+    "lat": -34.045347,
+    "lng": 18.359283,
+    "match": "Mexicola Locale, The Promenade, Hanging Meadow, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "Mexicola Locale, Hout Bay, Cape Town"
+  },
+  "u": {
+    "lat": -34.044411,
+    "lng": 18.350765,
+    "match": "Harbour Road, The Spinnaker, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "31 Harbour Road, Hout Bay"
+  },
+  "g": {
+    "lat": -34.030276,
+    "lng": 18.356506,
+    "match": "Main Road, Kronendal Retirement Village, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
+    "query": "30 Main Road, Hout Bay"
+  }
+}

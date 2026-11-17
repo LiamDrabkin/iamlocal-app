@@ -2,17 +2,12 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import FaceStack from '@/components/FaceStack';
-import MapBase from '@/components/MapBase';
+import MapSurface, { CAT_LABEL as LABEL } from '@/components/MapSurface';
 import { Chip, Icon, Shell } from '@/components/ui';
 import { useApp } from '@/lib/store';
-import { spreadPins } from '@/lib/spread';
 import { img, type Cat } from '@/lib/types';
 
-/** Stylised map size (matches the .mapbox aspect ratio) and the footprint of one pin plus its name. */
-const MAP = { w: 390, h: 700 };
-const PIN = { w: 84, h: 84 };
 
-const LABEL: Record<Cat, string> = { eat: 'Eat', drink: 'Drink', do: 'Do' };
 
 export default function MapPage() {
   const { data, s, set, venue } = useApp();
@@ -29,9 +24,6 @@ export default function MapPage() {
     }
     return m;
   }, [data.people, s.following]);
-
-  /** Pin positions after spacing. Computed over all venues so pins do not jump when filtering. */
-  const pos = useMemo(() => spreadPins(data.venues.map((v) => ({ id: v.id, x: v.x, y: v.y })), MAP, PIN), [data.venues]);
 
   /** Locals' specials: posts from venues that carry a photo. */
   const specials = data.posts.filter((p) => p.authorKind === 'venue' && p.photo);
@@ -54,24 +46,7 @@ export default function MapPage() {
         </div>
       </div>
 
-      <div className="mapbox" onClick={() => setSel(null)}>
-        <MapBase />
-        {shown.map((v) => {
-          const people = hereBy.get(v.id) ?? [];
-          return (
-            <div key={v.id} className={`pinw ${v.id === sel ? 'sel' : ''}`} style={{ left: `${((pos.get(v.id)?.x ?? v.x) / MAP.w) * 100}%`, top: `${((pos.get(v.id)?.y ?? v.y) / MAP.h) * 100}%` }}>
-              <button className="pin2" aria-pressed={v.id === sel} aria-label={`${v.name}, ${LABEL[v.cat]}${people.length ? `, ${people.length} people you follow are here` : ''}`}
-                onClick={(e) => { e.stopPropagation(); setSel(v.id === sel ? null : v.id); }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img(v.logo ?? v.img)} alt="" />
-                <span className="pn">{v.name}</span>
-              </button>
-              {people.length > 0 && <div className="pst"><FaceStack ids={people} popover /></div>}
-            </div>
-          );
-        })}
-        <p className="sm" style={{ position: 'absolute', left: 12, bottom: 8, right: 12, zIndex: 1, color: 'var(--i3)' }}>Stylised map. Positions approximate. Faces are people you follow who chose to share.</p>
-      </div>
+      <MapSurface venues={shown} sel={sel} onSelect={setSel} hereBy={hereBy} />
 
       {specials.length > 0 && (
         <section className="spw" aria-label="Locals' specials">
