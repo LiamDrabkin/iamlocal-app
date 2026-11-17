@@ -10,12 +10,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useAuth } from './auth';
 import { loadUserState, saveUserState } from './userState';
 import type { Visit } from './visits';
+import { DEFAULT_DARK, DEFAULT_LIGHT, resolveTheme, type ThemeId } from './themes';
 import { ME, type AppData, type Person, type Post, type Review, type Venue } from './types';
 
 const KEY = 'ial-demo-v2';
 
 export interface Local {
-  theme: 'light' | 'dark' | 'system';
+  theme: ThemeId | 'system' | 'light' | 'dark'; // 'light'/'dark' are legacy saved values
+  lightPick: ThemeId; // used when following the phone, and for legacy 'light'
+  darkPick: ThemeId;
   following: string[]; // people
   venueFollows: string[];
   favs: string[]; // venues shown on Favourites
@@ -31,10 +34,15 @@ export interface Local {
   myPosts: Post[];
   history: Visit[]; // Doorway history: check-ins, with receipt confirmed or not
   checkedIn: string | null; // venue id of the current check-in, if any
+  profile: { avatar?: string; cover?: string; bio?: string }; // my edits to my own profile
+  connected: string[]; // social platforms "linked" (mock-up only, nothing is connected)
+  share: { places: boolean; reviews: boolean; photos: boolean }; // what my profile shows to others
 }
 
 const DEFAULTS: Local = {
   theme: 'system',
+  lightPick: DEFAULT_LIGHT,
+  darkPick: DEFAULT_DARK,
   following: ['ana', 'daria', 'craig', 'james', 'mischelle', 'aedan', 'philip'],
   venueFollows: ['w', 'l', 'b', 'd'],
   favs: ['w', 'l', 'b', 'd'],
@@ -54,6 +62,9 @@ const DEFAULTS: Local = {
     { venueId: 'd', at: '2026-11-08T13:10:00+02:00', receipt: true, sample: true },
   ],
   checkedIn: null,
+  profile: {},
+  connected: [],
+  share: { places: true, reviews: true, photos: true },
 };
 
 interface Ctx {
@@ -128,19 +139,21 @@ export function AppProvider({ data, children }: { data: AppData; children: React
     try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* ignore */ }
   }, [s, ready]);
 
+  // Apply the chosen theme: `data-theme` is light or dark, `data-skin` picks the palette (lib/themes.ts).
   useEffect(() => {
     // Wait for the saved choice to load; until then the pre-paint script in layout.tsx owns the theme.
     if (!ready) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const apply = () => {
-      const dark = s.theme === 'dark' || (s.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      const { id, mode } = resolveTheme(s, mq.matches);
+      document.documentElement.dataset.theme = mode;
+      document.documentElement.dataset.skin = id;
     };
     apply();
     if (s.theme !== 'system') return;
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
     mq.addEventListener('change', apply);
     return () => mq.removeEventListener('change', apply);
-  }, [s.theme, ready]);
+  }, [s.theme, s.lightPick, s.darkPick, ready]);
 
   const set = useCallback((patch: Partial<Local>) => setS((p) => ({ ...p, ...patch })), []);
   const flip: Ctx['flip'] = useCallback((key, id) => setS((p) => ({ ...p, [key]: p[key].includes(id) ? p[key].filter((x) => x !== id) : [...p[key], id] })), []);
@@ -148,7 +161,8 @@ export function AppProvider({ data, children }: { data: AppData; children: React
   const reset = useCallback(() => setS(DEFAULTS), []);
 
   const value = useMemo<Ctx>(() => {
-    const pm = new Map(data.people.map((p) => [p.id, p]));
+    // My own profile edits override the sample record for me, so every screen shows them.
+    const pm = new Map(data.people.map((p) => [p.id, p.id === ME ? { ...p, avatar: s.profile.avatar ?? p.avatar, bio: s.profile.bio ?? p.bio } : p]));
     const vm = new Map(data.venues.map((v) => [v.id, v]));
     return {
       data, s, set, flip, has, reset, ready,

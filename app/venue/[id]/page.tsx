@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
+import FaceStack from '@/components/FaceStack';
 import { Back, Chip, Faces, I, Icon, PersonAv, SampleNote, Shell } from '@/components/ui';
 import { useApp } from '@/lib/store';
 import { ME, img, type Review } from '@/lib/types';
@@ -13,6 +14,7 @@ export default function VenuePage() {
   const [stars, setStars] = useState(4);
   const [text, setText] = useState('Quiet afternoon and friendly staff.');
   const [tag, setTag] = useState(true);
+  const [tab, setTab] = useState<'specials' | 'events' | 'menu' | 'photos' | 'reviews'>('specials');
 
   if (!v) return <Shell><div className="sc"><Back href="/map">Back to the map</Back><h1>Place not found</h1></div></Shell>;
 
@@ -35,13 +37,6 @@ export default function VenuePage() {
         <Back href="/map">Back to the map</Back>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="cover" src={img(v.img)} alt={v.name} />
-        {!!v.gallery?.length && (
-          <div className="gal" aria-label={`More photos of ${v.name}`}>
-            {v.gallery.map((g) => (// eslint-disable-next-line @next/next/no-img-element
-              <img key={g} src={img(g)} alt="" loading="lazy" />
-            ))}
-          </div>
-        )}
         <div className="col"><h1>{v.name}</h1><p>{v.kind} · Hout Bay</p>
           {v.address && <p className="sm">{v.address}</p>}
           <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
@@ -64,6 +59,44 @@ export default function VenuePage() {
           <div className="card"><h3>Here now</h3><div className="row"><Faces ids={hereNow.map((p) => p.id)} /><p className="sm">{hereNow.map((p) => p.name).join(', ')} (people you follow who chose to share)</p></div></div>
         )}
 
+        {/* Venue-owned section: specials, events, menu, photos and reviews. */}
+        <div className="tabs2" role="tablist" aria-label={`${v.name} sections`}>
+          {([['specials', 'Specials'], ['events', 'Events'], ['menu', 'Menu'], ['photos', 'Photos'], ['reviews', 'Reviews']] as const).map(([k, l]) => (
+            <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
+          ))}
+        </div>
+        {tab === 'specials' && (<>
+          {v.deal && <div className="card"><div className="row sp"><h3>Locals' offer</h3><Chip tone="rw">Sample</Chip></div><p>{v.deal}</p></div>}
+          {posts.filter((p) => p.photo).map((p) => (
+            <div className="card" key={p.id}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="pimg" src={img(p.photo!)} alt="" loading="lazy" />
+              <div className="row sp"><p className="sm">{p.at}</p>{p.chip && <Chip tone="rw">{p.chip}</Chip>}</div>
+              <p style={{ color: 'var(--ink)' }}>{p.text} [sample post]</p>
+            </div>
+          ))}
+          {!v.deal && !posts.some((p) => p.photo) && <p>No specials listed yet.</p>}
+        </>)}
+        {tab === 'events' && (<>
+          {events.length === 0 && <p>No events listed yet.</p>}
+          {events.map((e) => (
+            <div className="card" key={e.id}><h3>{e.title}</h3><p>{e.whenText}</p><div className="row" style={{ gap: 8 }}><FaceStack ids={e.going} more={e.goingMore} /><p className="sm">{e.going.length + e.goingMore} going</p></div></div>
+          ))}
+        </>)}
+        {tab === 'menu' && <div className="card"><h3>Menu</h3><p>[Pending: the venue adds its menu from the manager app.]</p></div>}
+        {tab === 'photos' && (v.gallery?.length
+          ? <div className="pgrid">{v.gallery.map((g2) => (// eslint-disable-next-line @next/next/no-img-element
+              <img key={g2} src={img(g2)} alt="" loading="lazy" />
+            ))}</div>
+          : <p>No photos yet.</p>)}
+        {tab === 'reviews' && (<>
+          {reviews.length === 0 && <p>No reviews yet.</p>}
+          {reviews.map((r) => { const p = person(r.personId); return (
+            <div className="card" key={r.id}><div className="row"><PersonAv p={p} />
+              <Link href={`/profile/${p.id}`} className="col link"><h3>{p.name}</h3><p className="sm">{r.rating} of 5</p></Link><Chip tone="calm">Verified visit</Chip></div><p>{r.text}</p></div>
+          ); })}
+        </>)}
+
         <div className="card">
           <h3>What trust is made of</h3>
           {[['Discounts matched to receipts', `${Math.round(v.trust * 0.98)}%`, v.trust * 0.98], ['Confirmed local visits, last 90 days', '[N]', 70], ['Tourist-season price rises reported', '[N]', 100 - v.trust]].map(([l, n, w]) => (
@@ -81,10 +114,6 @@ export default function VenuePage() {
             : 'The offer starts at Local. You need [N] more confirmed visits over [N] weeks. Your visits already count toward points.'}</p>
           {v.deal && <p className="sm">{v.deal}</p>}
         </div>
-
-        {events.map((e) => (
-          <div className="card" key={e.id}><h3>{e.title}</h3><p>{e.whenText}</p><div className="row" style={{ gap: 8 }}><Faces ids={e.going} /><p className="sm">and {e.goingMore} more going</p></div></div>
-        ))}
 
         <div className="card">
           <h3>Rate this place</h3>
@@ -115,11 +144,6 @@ export default function VenuePage() {
         )) : <div className="card"><h3>Posts are for followers</h3><p>Follow {v.name} to see its posts and alerts. The owner never sends marketing to people who do not follow.</p></div>}
         {following && posts.length === 0 && <p>No posts from this venue yet.</p>}
 
-        <h2>Recent reviews</h2>
-        {reviews.map((r) => { const p = person(r.personId); return (
-          <div className="card" key={r.id}><div className="row"><PersonAv p={p} />
-            <Link href={`/profile/${p.id}`} className="col link"><h3>{p.name}</h3><p className="sm">{r.rating} of 5</p></Link><Chip tone="calm">Verified visit</Chip></div><p>{r.text}</p></div>
-        ); })}
       </div>
     </Shell>
   );

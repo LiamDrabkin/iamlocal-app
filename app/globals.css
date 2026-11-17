@@ -134,3 +134,32 @@ label { font-size: 13px; font-weight: 700; }
 .spr { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 6px; }
 .spc { flex: none; width: 220px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 4px; padding: 10px; background: var(--sf); border: 1.5px solid var(--ln); border-radius: 16px; }
 .spc img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; }
+
+/* Themes (lib/themes.ts). On-brand ones only re-assign the five brand colours. No gradients, no shadows.
+   Brand (light) is :root and Brand night is [data-theme='dark'], so neither needs a block here. */
+[data-skin='harbour'] { --bg:#B8DDD3; --sf:#FFF7EB; --ink:#183A3D; --i2:#183A3D; --i3:#2B4F52; --ln:#183A3D; --ctl:#183A3D; --sea:#FFF7EB; --land:#CFE6E0; --beach:#F8CD62; --road:#FFF7EB; }
+[data-skin='golden'] { --bg:#F8CD62; --sf:#FFF7EB; --ink:#183A3D; --i2:#183A3D; --i3:#2B4F52; --ac:#183A3D; --onac:#FFF7EB; --mk:#C23B25; --ln:#183A3D; --ctl:#183A3D; --sea:#B8DDD3; --land:#FFF7EB; --beach:#F8CD62; --road:#FFF7EB; }
+[data-skin='night-market'] { --ac:#F8CD62; --onac:#0E2527; --mk:#F8CD62; }
+[data-skin='night-harbour'] { --bg:#183A3D; --sf:#0E2527; --ac:#B8DDD3; --onac:#0E2527; --mk:#B8DDD3; --sea:#0E2527; --land:#1F4549; --beach:#2C5558; --road:#2C5558; }
+/* Experiments: off-brand, for discussion only. Hidden on production. */
+[data-skin='x-lilac'] { --bg:#F4EEFA; --sf:#E9DDF6; --ink:#2A1F45; --i2:#4B3F6B; --i3:#5A4E7A; --ac:#6B3FD1; --onac:#FFFFFF; --ln:#D5C5EC; --ctl:#7A6A9C; --calm:#CDBFF0; --sun:#FFD27A; --mk:#8E5CF0; --sea:#DCCFF3; --land:#F4EEFA; --beach:#F0E3C8; --road:#FFFFFF; }
+[data-skin='x-mono'] { --bg:#FFFFFF; --sf:#F2F2F2; --ink:#111111; --i2:#333333; --i3:#555555; --ac:#1B5CFF; --onac:#FFFFFF; --ln:#DDDDDD; --ctl:#777777; --calm:#D8E4FF; --sun:#FFE066; --mk:#1B5CFF; --sea:#E8F0FF; --land:#F6F6F6; --beach:#EDEDED; --road:#FFFFFF; }
+[data-skin='x-ink'] { --bg:#0B0B0F; --sf:#17171F; --ink:#F2F2F7; --i2:#C5C5D0; --i3:#9A9AAA; --ac:#4FE3B0; --onac:#0B0B0F; --ln:#2A2A36; --ctl:#5A5A6B; --calm:#B8F0DC; --sun:#F8CD62; --mk:#4FE3B0; --sea:#07070A; --land:#17171F; --beach:#2A2A36; --road:#262633; }
+[data-skin='x-plum'] { --bg:#1A1022; --sf:#2A1B36; --ink:#F7EEFF; --i2:#D8C6E8; --i3:#B49BCB; --ac:#FF7AB6; --onac:#1A1022; --ln:#44305A; --ctl:#7A5E96; --calm:#E6C9FF; --sun:#FFD27A; --mk:#FF7AB6; --sea:#120A18; --land:#2A1B36; --beach:#44305A; --road:#3A2A4A; }
+
+/* Theme picker */
+.looks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.looks button { text-align: left; min-height: 64px; padding: 10px; border-radius: 12px; border: 1.5px solid var(--ctl); background: var(--sf); cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.looks button.on { border: 3px solid var(--ink); }
+
+/* Profile cover and edit */
+.pcover { width: 100%; height: 120px; object-fit: cover; border-radius: 16px; background: var(--calm); }
+.tabs2 { display: flex; gap: 6px; overflow-x: auto; }
+.tabs2 button { flex: none; min-height: 44px; padding: 0 14px; border-radius: 8px; border: 1.5px solid var(--ctl); font: 600 14px 'Figtree', sans-serif; background: transparent; cursor: pointer; }
+.tabs2 button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.tgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tgrid button { text-align: left; min-height: 72px; padding: 10px; border-radius: 12px; border: 1.5px solid var(--ctl); background: var(--sf); cursor: pointer; display: flex; flex-direction: column; gap: 6px; }
+.tgrid button.on { border: 3px solid var(--ink); }
+.dots { display: flex; gap: 4px; }
+.dots i { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--ctl); }

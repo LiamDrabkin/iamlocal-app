@@ -1,3 +1,4 @@
+import { THEMES } from '@/lib/themes';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { loadData } from '@/lib/db';
@@ -10,7 +11,8 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, view
 export const revalidate = 60; // re-read Supabase at most once a minute
 
 // Runs before first paint so there is no light flash for dark-mode visitors.
-const themeScript = `try{var s=JSON.parse(localStorage.getItem('ial-demo-v2')||'{}').theme||'system';var d=s==='dark'||(s==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light'}catch(e){}`;
+// Runs before first paint so there is no flash. Mirrors resolveTheme() in lib/themes.ts.
+const themeScript = `try{var s=JSON.parse(localStorage.getItem('ial-demo-v2')||'{}'),M=${JSON.stringify(Object.fromEntries(THEMES.map((t) => [t.id, t.mode])))},t=s.theme||'system',d=matchMedia('(prefers-color-scheme: dark)').matches,id=t==='system'?(d?s.darkPick:s.lightPick):t==='light'?s.lightPick:t==='dark'?s.darkPick:t;if(!M[id])id=(t==='dark'||(t==='system'&&d))?'night':'brand';var r=document.documentElement;r.dataset.theme=M[id];r.dataset.skin=id}catch(e){}`;
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const data = await loadData();

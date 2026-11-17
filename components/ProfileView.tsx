@@ -12,10 +12,11 @@ export default function ProfileView({ id }: { id: string }) {
   const { data, s, flip, has, person, venue } = useApp();
   const p = person(id);
   const mine = id === ME;
-  const [tab, setTab] = useState<'places' | 'photos' | 'reviews' | 'people'>('places');
+  const [tab, setTab] = useState<'places' | 'people' | 'posts'>('places');
 
   const reviews = [...(mine ? s.myReviews : []), ...data.reviews.filter((r) => r.personId === id)];
   const following = data.people.filter((x) => x.id !== id && (mine ? s.following.includes(x.id) : x.recent.some((r) => p.recent.includes(r))));
+  const posts = [...(mine ? s.myPosts : []), ...data.posts.filter((x) => x.authorKind === 'person' && x.authorId === id)];
   const deals = data.events.filter((e) => has('alerts', e.venueId));
 
   return (
@@ -25,11 +26,16 @@ export default function ProfileView({ id }: { id: string }) {
         <div className="row sp"><h1>{mine ? 'Profile' : p.name}</h1>
           {mine && <Link href="/settings" className="bell" aria-label="Settings" style={{ borderRadius: 12, width: 48, height: 48 }}><Icon d={I.gear} /></Link>}</div>
 
+        {mine && s.profile.cover
+          // eslint-disable-next-line @next/next/no-img-element
+          ? <img className="pcover" src={s.profile.cover} alt="" />
+          : null}
         <div className="card">
           <div className="row">{/* eslint-disable-next-line @next/next/no-img-element */}<img className="av big" src={img(p.avatar)} alt={p.name} />
             <div className="col"><h2>{mine ? `${p.name} (you)` : p.name}</h2><p>Hout Bay · {p.level}</p><p className="sm">{p.bio}</p></div></div>
           {!mine && <button className={`tog ${has('following', id) ? 'on' : ''}`} style={{ minHeight: 48 }} aria-pressed={has('following', id)} onClick={() => flip('following', id)}>{has('following', id) ? 'Following' : 'Follow'}</button>}
           <div className="lad">{LADDER.map((l) => <span key={l} className={l === p.level ? 'on' : ''}>{l}</span>)}</div>
+          {mine && <Link className="btn s" href="/profile/edit">Edit profile</Link>}
           {mine && <div className="row sp"><div className="col"><p className="sm">Your I am local reference</p><span style={{ font: "600 20px 'Source Code Pro', monospace", letterSpacing: '.06em' }}>IAL 7K2 9QD</span></div><Link className="btn" href="/doorway">Show doorway</Link></div>}
         </div>
 
@@ -44,7 +50,7 @@ export default function ProfileView({ id }: { id: string }) {
         <SampleNote />
 
         <div className="seg" role="tablist" aria-label="Profile sections">
-          {([['places', 'Places'], ...(p.photos?.length ? [['photos', 'Photos'] as const] : []), ['reviews', 'Reviews'], ['people', mine ? 'People' : 'Overlap']] as const).map(([k, l]) => (
+          {([['places', 'Places'], ['people', mine ? 'People' : 'Overlap'], ['posts', 'Posts']] as const).map(([k, l]) => (
             <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
           ))}
         </div>
@@ -56,16 +62,27 @@ export default function ProfileView({ id }: { id: string }) {
           ); })}
         </>)}
 
-        {tab === 'photos' && (
-          <div className="pgrid">
-            {p.photos?.map((ph) => (// eslint-disable-next-line @next/next/no-img-element
-              <img key={ph} src={img(ph)} alt="" loading="lazy" />
-            ))}
-          </div>
-        )}
-
-        {tab === 'reviews' && (<>
-          <h2>Recent reviews</h2>
+        {tab === 'posts' && (<>
+          {p.photos?.length ? (<>
+            <h2>Photos</h2>
+            <div className="pgrid">
+              {p.photos.map((ph) => (// eslint-disable-next-line @next/next/no-img-element
+                <img key={ph} src={img(ph)} alt="" loading="lazy" />
+              ))}
+            </div>
+          </>) : null}
+          <h2>Posts</h2>
+          {posts.length === 0 && <p>No posts yet.</p>}
+          {posts.map((x) => (
+            <div className="card" key={x.id}>
+              <div className="row sp"><p className="sm">{x.venueId ? venue(x.venueId).name : ''} · {x.at}</p>{x.chip && <Chip tone="calm">{x.chip}</Chip>}</div>
+              <p style={{ color: 'var(--ink)' }}>{x.text}</p>
+              {x.photo && (// eslint-disable-next-line @next/next/no-img-element
+                <img className="pimg" src={img(x.photo)} alt="" loading="lazy" />
+              )}
+            </div>
+          ))}
+          <h2>Reviews</h2>
           {reviews.length === 0 && <p>No reviews yet.</p>}
           {reviews.map((r) => (
             <Link key={r.id} href={`/venue/${r.venueId}`} className="card"><div className="row sp"><h3>{venue(r.venueId).name}</h3><Chip>{r.rating} of 5</Chip></div><p>{r.text}</p></Link>

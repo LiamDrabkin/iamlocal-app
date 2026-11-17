@@ -2,7 +2,11 @@
 import Link from 'next/link';
 import { Back, Shell } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { visibleThemes } from '@/lib/themes';
 import { useApp, type Local } from '@/lib/store';
+
+/** Platforms a member could link. Mock-up only: linking just records the choice. */
+const PLATFORMS = ['Instagram', 'Facebook', 'TikTok', 'X'];
 
 type NotifKey = keyof Local['notif'];
 
@@ -33,11 +37,40 @@ export default function Settings() {
           </div>
         )}
         <div className="card">
-          <h2>Appearance</h2>
-          <div className="seg" role="group" aria-label="Theme">
-            {(['light', 'dark', 'system'] as const).map((t) => <button key={t} className={s.theme === t ? 'on' : ''} aria-pressed={s.theme === t} onClick={() => set({ theme: t })} style={{ textTransform: 'capitalize' }}>{t}</button>)}
-          </div>
-          <p className="sm">System follows your phone.</p>
+          <h2>Theme</h2>
+          <button className={`tog ${s.theme === 'system' ? 'on' : ''}`} style={{ minHeight: 48 }} aria-pressed={s.theme === 'system'} onClick={() => set({ theme: 'system' })}>
+            {s.theme === 'system' ? 'Following my phone (light and dark)' : 'Follow my phone instead'}
+          </button>
+          {([['Light', 'light', false], ['Dark', 'dark', false], ['Experiments (off-brand, for discussion)', null, true]] as const).map(([title, mode, exp]) => {
+            const list = visibleThemes.filter((t) => (exp ? !!t.experiment : !t.experiment && t.mode === mode));
+            if (!list.length) return null;
+            return (<div className="col" style={{ gap: 8 }} key={title}>
+              <h3>{title}</h3>
+              <div className="tgrid" role="group" aria-label={title}>
+                {list.map((t) => (
+                  <button key={t.id} className={s.theme === t.id ? 'on' : ''} aria-pressed={s.theme === t.id}
+                    onClick={() => set(t.mode === 'dark' ? { theme: t.id, darkPick: t.id } : { theme: t.id, lightPick: t.id })}>
+                    <span className="dots" aria-hidden="true">{t.swatch.map((c) => <i key={c} style={{ background: c }} />)}</span>
+                    <b>{t.name}</b><span className="sm">{t.note}</span>
+                  </button>
+                ))}
+              </div>
+            </div>);
+          })}
+        </div>
+        <div className="card">
+          <h2>Connected accounts</h2>
+          <p className="sm">Mock-up: choosing Connect only records your choice. Nothing is linked and nothing is shared.</p>
+          {PLATFORMS.map((n) => { const on = s.connected.includes(n); return (
+            <div className="row" key={n}><div className="col"><b>{n}</b></div>
+              <button className={`tog ${on ? 'on' : ''}`} aria-pressed={on} onClick={() => set({ connected: on ? s.connected.filter((x) => x !== n) : [...s.connected, n] })}>{on ? 'Connected' : 'Connect'}</button></div>
+          ); })}
+        </div>
+        <div className="card">
+          <h2>What my profile shows</h2>
+          {([['places', 'My places'], ['reviews', 'My reviews'], ['photos', 'My photos']] as const).map(([k, t]) => (
+            <div className="row" key={k}><div className="col"><b>{t}</b></div><Toggle on={s.share[k]} onClick={() => set({ share: { ...s.share, [k]: !s.share[k] } })} label={t} /></div>
+          ))}
         </div>
         <div className="card">
           <h2>Notifications</h2>

@@ -79,4 +79,5 @@ export interface AppData {
 export const ME = 'liam';
 
 /** Public path of an image stem. */
-export const img = (stem: string) => `/img/${stem}.jpg`;
+/** File stem in /public/img, or a ready URL (a picked photo saved as a data URL). */
+export const img = (stem: string) => (/^(data:|https?:)/.test(stem) ? stem : `/img/${stem}.jpg`);
