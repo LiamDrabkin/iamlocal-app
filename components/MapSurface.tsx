@@ -12,7 +12,7 @@ import { useMemo } from 'react';
 import FaceStack from '@/components/FaceStack';
 import MapBase from '@/components/MapBase';
 import { spreadPins } from '@/lib/spread';
-import { img, type Cat, type Venue } from '@/lib/types';
+import { pinImg, type Cat, type Venue } from '@/lib/types';
 
 export interface MapSurfaceProps {
   venues: Venue[];
@@ -42,7 +42,7 @@ export default function MapSurface({ venues, sel, onSelect, hereBy }: MapSurface
             <button className="pin2" aria-pressed={v.id === sel} aria-label={`${v.name}, ${CAT_LABEL[v.cat]}${people.length ? `, ${people.length} people you follow are here` : ''}`}
               onClick={(e) => { e.stopPropagation(); onSelect(v.id === sel ? null : v.id); }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img(v.logo ?? v.img)} alt="" />
+              <img src={pinImg(v)} alt="" />
               <span className="pn">{v.name}</span>
             </button>
             {people.length > 0 && <div className="pst"><FaceStack ids={people} popover /></div>}

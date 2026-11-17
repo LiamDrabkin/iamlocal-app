@@ -75,6 +75,9 @@ export interface AppData {
   source: 'supabase' | 'sample';
 }
 
+/** Small square thumbnail of a venue for map pins, or its logo. See scripts/make_pin_thumbs.py. */
+export const pinImg = (v: { logo?: string | null; img: string }) => img(v.logo ?? `${v.img}-pin`);
+
 /** Id of the person using the mock. */
 export const ME = 'liam';
 
