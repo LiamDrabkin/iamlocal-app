@@ -1,0 +1,40 @@
+'use client';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Shell } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
+import { img } from '@/lib/types';
+
+export default function Welcome() {
+  const router = useRouter();
+  const { enabled, user } = useAuth();
+  return (
+    <Shell tabs={false}>
+      <form className="sc" onSubmit={(e) => {
+        e.preventDefault();
+        const email = (new FormData(e.currentTarget).get('email') as string | null)?.trim();
+        // With sign-in on, a typed email carries over to the sign-in page; otherwise just look around.
+        router.push(enabled && !user && email ? `/signin?email=${encodeURIComponent(email)}` : '/favourites');
+      }} style={{ paddingBottom: 40 }}>
+        <div className="row" style={{ fontWeight: 700, fontSize: 18 }}>
+          <svg className="ic" viewBox="0 0 24 24" style={{ width: 24, height: 28 }} aria-hidden="true"><path d="M5 22V11a7 7 0 0 1 14 0v11" /><circle cx="12" cy="17" r="1.5" fill="currentColor" /></svg>
+          <span>I am local</span>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={img('site/welcome')} alt="Hout Bay at dusk, the harbour lights below Chapman's Peak" style={{ width: '100%', height: 190, objectFit: 'cover', objectPosition: 'center 78%', borderRadius: 16 }} />
+        <h1 style={{ fontSize: 32 }}>Member Signup</h1>
+        <p>The I am local membership rewards the people who keep a town lively.</p>
+        <div className="card">
+          {['Join from anywhere.', 'Visit a taking-part place and show your membership.', 'Photograph your receipt. Your first confirmed visit switches the membership on.'].map((t, i) => (
+            <div className="row" key={t}><span className="chip" style={{ borderRadius: '50%', width: 28, height: 28, justifyContent: 'center', padding: 0 }}>{i + 1}</span><p>{t}</p></div>
+          ))}
+        </div>
+        <div className="col" style={{ gap: 6 }}><label htmlFor="em">Email</label><input id="em" name="email" type="email" placeholder="you@example.com" /></div>
+        <button className="btn" type="submit" style={{ minHeight: 56 }}>Join</button>
+        <p style={{ textAlign: 'center' }}><Link href={enabled ? '/signin' : '/favourites'} style={{ textDecoration: 'underline' }}>I already have a membership</Link></p>
+        <p className="sm" style={{ textAlign: 'center' }}>Receipt photos and your location are used only to confirm visits. [Privacy notice wording pending]</p>
+        <div className="sample">Mock-up. Everything here is sample data and nothing is sent anywhere.</div>
+      </form>
+    </Shell>
+  );
+}

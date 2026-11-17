@@ -1,0 +1,193 @@
+{
+  "venues": {
+    "w": {
+      "slug": "woodcutters",
+      "src": "Places/Woodcutters Arms",
+      "hero": "Bar.jpeg",
+      "logo": "insignia.png",
+      "gallery": [
+        "food.jpeg",
+        "food2.jpeg"
+      ],
+      "post": "promopost.jpeg"
+    },
+    "l": {
+      "slug": "lookout",
+      "src": "Places/The Lookout Deck",
+      "hero": "background.jpeg",
+      "gallery": [
+        "on water.jpg",
+        "inside.jpg",
+        "inside2.jpg",
+        "frondesk.jpg",
+        "food.jpg"
+      ],
+      "post": "Post.jpeg"
+    },
+    "b": {
+      "slug": "harbour-market",
+      "src": "Places/Bay Harbour Market",
+      "hero": "Market2.jpeg",
+      "logo": "insignia.jpeg",
+      "gallery": [
+        "Best-Markets-in-Cape-Town-Bay-Harbour-Market-2-Featured-On-Secret-Cape-Town.jpg",
+        "Market food.jpeg",
+        "market clothes.jpg"
+      ]
+    },
+    "d": {
+      "slug": "dunes",
+      "src": "Places/Dunes Beach Restaurant and Bar",
+      "hero": "outside.jpg",
+      "gallery": [
+        "outside2.jpg",
+        "balcnoyview.jpg",
+        "food.jpeg",
+        "Food2.jpeg"
+      ]
+    },
+    "f": {
+      "slug": "fish-on-the-rocks",
+      "src": "Places/Fish on the Rocks",
+      "hero": "FOR.jpg",
+      "gallery": [
+        "Food.jpeg"
+      ]
+    },
+    "m": {
+      "slug": "mariners-wharf",
+      "src": "Places/Mariners Wharf",
+      "hero": "Outside.jpeg",
+      "logo": "logo.jpeg",
+      "gallery": [
+        "food.jpg",
+        "inside.jpeg"
+      ],
+      "post": "post.jpeg"
+    },
+    "x": {
+      "slug": "massimos",
+      "src": "Places/Massimos",
+      "hero": "outside.jpeg",
+      "logo": "insignia.webp",
+      "gallery": [
+        "inside.jpeg",
+        "food.jpeg",
+        "food.jpg"
+      ],
+      "post": "post.jpeg"
+    },
+    "y": {
+      "slug": "clay-cafe",
+      "src": "Places/Clay Cafe",
+      "hero": "Outside.jpeg",
+      "gallery": [
+        "resturant.jpeg",
+        "food.jpg",
+        "food.jpeg"
+      ]
+    },
+    "o": {
+      "slug": "chapmans-peak-hotel",
+      "src": "Places/Chapmans Peak Hotel",
+      "hero": "Hotel front view.jpeg",
+      "gallery": [
+        "HotelNight.jpeg",
+        "Hotelresturant.jpeg"
+      ]
+    },
+    "r": {
+      "slug": "chapmans-peak-drive",
+      "src": "Places/Chapmans Peak Drive viewpoint",
+      "hero": "ChappiesView1.jpeg",
+      "gallery": [
+        "ChappiesView3.jpeg",
+        "ChappiesView2.jpeg",
+        "ChappiesView4.jpeg",
+        "ChappiesView5.jpeg"
+      ]
+    },
+    "z": {
+      "slug": "beach-bar",
+      "src": "Places/Beach Bar",
+      "hero": "BeachbarFront view.jpg",
+      "logo": "Beachbar.jpeg",
+      "gallery": [
+        "beach bar ocean view.jpg",
+        "Beach bar bar.jpeg",
+        "Insignia.jpeg"
+      ]
+    },
+    "q": {
+      "slug": "mexicola-locale",
+      "src": "Places/Mexicola Locale",
+      "hero": "frontdoor.webp",
+      "gallery": [
+        "bar.jpeg",
+        "drinks.jpeg",
+        "food.webp",
+        "food.jpeg",
+        "inside.webp",
+        "inside 2.jpeg",
+        "outside.webp"
+      ]
+    },
+    "u": {
+      "slug": "the-loft",
+      "src": "Places/The Loft",
+      "hero": "background.jpeg",
+      "logo": "insignia.png",
+      "gallery": [
+        "inside.jpg",
+        "post2.jpg"
+      ]
+    },
+    "g": {
+      "slug": "darios",
+      "src": "Places/Darios Cafe",
+      "hero": "Outside.jpeg",
+      "logo": "insignia.jpeg",
+      "gallery": [
+        "Inside.jpeg",
+        "showoff.jpg"
+      ]
+    },
+    "s": {
+      "slug": "sherleys",
+      "src": "Places/Sherleys",
+      "hero": "background.jpeg"
+    }
+  },
+  "people": {
+    "christian": {
+      "src": "Users/Christian",
+      "avatar": {
+        "file": "lookout.JPG",
+        "crop": "700x700+1348+20"
+      },
+      "photos": [
+        "Christianbeachbar.JPG",
+        "Christianbeachbar2.JPG",
+        "christianbeachbar4.JPG",
+        "christianbeachbar99.JPG",
+        "ChristianBeachabr.JPG",
+        "Christianwoodies5.JPG",
+        "christianwoodies.JPG",
+        "Woodies.HEIC",
+        "christian44.JPG",
+        "HBmarket2.HEIC",
+        "HBmarket.JPG",
+        "post.JPG",
+        "christianMex.JPG",
+        "christianshirleys.JPG",
+        "lookout.JPG",
+        "christianpost.JPG",
+        "post3.JPG",
+        "post4.JPG"
+      ]
+    }
+  },
+  "site": {
+    "welcome": "Opening.jpg"
+  }
+}

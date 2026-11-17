@@ -1,0 +1,180 @@
+-- I am local mock-up schema. Read-only for the public (anon) role: the app keeps
+-- each visitor's likes, follows and posts in their own browser, so nothing here is
+-- written by visitors. All data is SAMPLE data; venue names are real.
+
+create table if not exists people (
+  id text primary key, name text not null, level text not null, bio text,
+  avatar text not null, sharing boolean not null default false,
+  at_venue text, recent text[] not null default '{}',
+  photos text[] not null default '{}'
+);
+create table if not exists venues (
+  address text, website text, instagram text,
+  logo text, gallery text[] not null default '{}',
+  id text primary key, name text not null, kind text not null,
+  cat text not null check (cat in ('eat','drink','do')),
+  x int not null, y int not null,             -- stylised map position, approximate
+  score numeric(2,1) not null, trust int not null, img text not null,
+  blurb text, deal text
+);
+create table if not exists events (
+  id text primary key, venue_id text not null references venues(id),
+  title text not null, when_text text not null,
+  going text[] not null default '{}', going_more int not null default 0, chip text
+);
+create table if not exists posts (
+  id text primary key, author_kind text not null check (author_kind in ('person','venue')),
+  author_id text not null, venue_id text references venues(id),
+  body text not null, photo text, chip text,
+  likes int not null default 0, reps int not null default 0, at_text text, rating int
+);
+create table if not exists reviews (
+  id text primary key, venue_id text not null references venues(id),
+  person_id text not null references people(id),
+  rating int not null check (rating between 1 and 5), body text not null
+);
+
+-- Row level security: anyone may read, nobody may write through the public API.
+alter table people enable row level security;
+alter table venues enable row level security;
+alter table events enable row level security;
+alter table posts enable row level security;
+alter table reviews enable row level security;
+do $$ declare t text; begin
+  foreach t in array array['people','venues','events','posts','reviews'] loop
+    execute format('drop policy if exists "public read" on %I', t);
+    execute format('create policy "public read" on %I for select to anon, authenticated using (true)', t);
+  end loop;
+end $$;
+
+-- Accounts and per-user state. Run after schema.sql (setup.sql does both, plus the sample data).
+-- Security model: every table below is private. Row-level security lets a signed-in user
+-- read and write only their own row; anonymous visitors can touch none of it.
+
+-- One profile row per account, created automatically when someone signs up.
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text,
+  display_name text,
+  created_at timestamptz not null default now()
+);
+
+-- Interim home for a user's follows, likes, posts and settings (one JSON document per user).
+-- To be replaced by normalised tables once the data model is settled.
+create table if not exists public.user_state (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+alter table public.user_state enable row level security;
+
+drop policy if exists "own profile read" on public.profiles;
+create policy "own profile read" on public.profiles for select to authenticated using (id = (select auth.uid()));
+drop policy if exists "own profile update" on public.profiles;
+create policy "own profile update" on public.profiles for update to authenticated using (id = (select auth.uid())) with check (id = (select auth.uid()));
+
+drop policy if exists "own state read" on public.user_state;
+create policy "own state read" on public.user_state for select to authenticated using (user_id = (select auth.uid()));
+drop policy if exists "own state insert" on public.user_state;
+create policy "own state insert" on public.user_state for insert to authenticated with check (user_id = (select auth.uid()));
+drop policy if exists "own state update" on public.user_state;
+create policy "own state update" on public.user_state for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists "own state delete" on public.user_state;
+create policy "own state delete" on public.user_state for delete to authenticated using (user_id = (select auth.uid()));
+
+-- Create the profile row on sign-up. SECURITY DEFINER with an empty search_path, as Supabase recommends.
+create or replace function public.handle_new_user() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  insert into public.profiles (id, email) values (new.id, new.email) on conflict (id) do nothing;
+  return new;
+end $$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();
+
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('ana','Ana','Local','Sunset drinks and quiz nights.','a_ana',true,'w',array['w','z','q']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('daria','Daria','Active','Market Fridays, always.','a_daria',true,'w',array['w','d','b']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('craig','Craig','Regular','Knows every barman on the bay.','a_craig',true,'l',array['l','c','g']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('james','James','Local','Live music hunter.','a_james',true,'l',array['l','u','w']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('mischelle','Mischelle','Active','Beach walks then brunch.','a_mischelle',true,'l',array['h','l','y']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('aedan','Aedan','Active','Harbour regular.','a_aedan',true,'b',array['b','m','f']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('philip','Philip','Local','Arcade bar champion.','a_philip',true,'u',array['u','w','s']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('andre','Andre','Active','Weekend seafood.','a_andre',true,'d',array['d','m','f']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('bryan','Bryan','Local','Chapmans Peak on a bike.','a_bryan',false,null,array['o','r']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('christian','Christian','Regular','Tests the menu so you do not have to.','people/christian/avatar',false,null,array['z','w','b','q','s','l']::text[],array['people/christian/photo-01','people/christian/photo-02','people/christian/photo-03','people/christian/photo-04','people/christian/photo-05','people/christian/photo-06','people/christian/photo-07','people/christian/photo-08','people/christian/photo-09','people/christian/photo-10','people/christian/photo-11','people/christian/photo-12','people/christian/photo-13','people/christian/photo-14','people/christian/photo-15','people/christian/photo-16','people/christian/photo-17','people/christian/photo-18']::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('wobyn','Wobyn','Active','New to the bay, loving it.','a_wobyn',false,null,array['c','y','x']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into people(id,name,level,bio,avatar,sharing,at_venue,recent,photos) values('liam','Liam','Active','Building I am local.','a_liam',false,null,array['w','b','d']::text[],array[]::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('w','Woodcutters Arms','Pub','drink',300,352,4.4,91,'venues/woodcutters/hero','Quiz night, third Monday of the month','Locals'' offer: Quiz night, third Monday of the month. Sample.','37 Main Road','https://www.woodcuttersarms.co.za','woodcuttersarms','venues/woodcutters/logo',array['venues/woodcutters/gallery-1','venues/woodcutters/gallery-2']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('l','The Lookout Deck','Restaurant','eat',170,176,4.2,84,'venues/lookout/hero','Live music on Sundays','Locals'' offer: Live music on Sundays. Sample.','Lot 65 Quayside, Hout Bay Harbour, Harbour Rd',null,null,null,array['venues/lookout/gallery-1','venues/lookout/gallery-2','venues/lookout/gallery-3','venues/lookout/gallery-4','venues/lookout/gallery-5']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('b','Bay Harbour Market','Market','do',216,206,4.6,88,'venues/harbour-market/hero','Friday evenings and weekend days','Locals'' offer: Friday evenings and weekend days. Sample.','31 Harbour Road','https://www.bayharbour.co.za','bayharbourmkt','venues/harbour-market/logo',array['venues/harbour-market/gallery-1','venues/harbour-market/gallery-2','venues/harbour-market/gallery-3']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('d','Dunes Beach Restaurant and Bar','Restaurant and bar','eat',152,268,4,79,'venues/dunes/hero',null,null,'1 Beach Road',null,null,null,array['venues/dunes/gallery-1','venues/dunes/gallery-2','venues/dunes/gallery-3','venues/dunes/gallery-4']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('f','Fish on the Rocks','Seafood','eat',96,168,4.3,82,'venues/fish-on-the-rocks/hero',null,null,'Harbour Road, Hout Bay Harbour',null,null,null,array['venues/fish-on-the-rocks/gallery-1']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('m','Mariner''s Wharf','Seafood','eat',128,192,3.9,64,'venues/mariners-wharf/hero',null,null,'Harbour Rd, Hout Bay Harbour','https://www.marinerswharf.co.za',null,'venues/mariners-wharf/logo',array['venues/mariners-wharf/gallery-1','venues/mariners-wharf/gallery-2']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('h','Hout Bay Beach','Beach','do',112,332,4.7,95,'v_hout-bay-beach',null,null,'Beach Road',null,null,null,array[]::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('x','Massimo''s','Italian','eat',232,326,4.5,90,'venues/massimos/hero',null,null,'Oakhurst Farm Park, Main Road','https://www.massimos.co.za',null,'venues/massimos/logo',array['venues/massimos/gallery-1','venues/massimos/gallery-2','venues/massimos/gallery-3']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('c','Cheyne''s','Restaurant','eat',266,378,4.1,77,'v_sherlieys',null,null,'1 Pam Arlene Place, Main Road',null,'cheynesrestaurant',null,array[]::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('y','Clay Cafe','Cafe and studio','do',256,418,4.5,89,'venues/clay-cafe/hero',null,null,'4080 Main Road','https://www.claycafe.co.za',null,null,array['venues/clay-cafe/gallery-1','venues/clay-cafe/gallery-2','venues/clay-cafe/gallery-3']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('o','Chapman''s Peak Hotel','Hotel bar','drink',204,490,4.3,85,'venues/chapmans-peak-hotel/hero',null,null,'Chapmans Peak Drive','https://www.chapmanspeakhotel.co.za',null,null,array['venues/chapmans-peak-hotel/gallery-1','venues/chapmans-peak-hotel/gallery-2']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('r','Chapman''s Peak Drive viewpoint','Viewpoint','do',122,516,4.8,93,'venues/chapmans-peak-drive/hero',null,null,'Chapman''s Peak Drive toll plaza, Hout Bay end','https://www.chapmanspeakdrive.co.za',null,null,array['venues/chapmans-peak-drive/gallery-1','venues/chapmans-peak-drive/gallery-2','venues/chapmans-peak-drive/gallery-3','venues/chapmans-peak-drive/gallery-4']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('v','World of Birds','Wildlife park','do',332,462,4.4,87,'v_hout-bay-beach',null,null,'Valley Road','https://www.worldofbirds.org.za',null,null,array[]::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('z','Beach Bar','Bar','drink',142,300,4.3,83,'venues/beach-bar/hero',null,null,'Cnr Chapmans Peak Drive and Beach Crescent','https://thebeachbarhoutbay.co.za','thebeachbarhoutbay','venues/beach-bar/logo',array['venues/beach-bar/gallery-1','venues/beach-bar/gallery-2','venues/beach-bar/gallery-3']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('q','Mexicola Locale','Mexican','eat',246,278,4.2,80,'venues/mexicola-locale/hero',null,null,'4 The Promenade Road',null,'the_mexicola_locale',null,array['venues/mexicola-locale/gallery-1','venues/mexicola-locale/gallery-2','venues/mexicola-locale/gallery-3','venues/mexicola-locale/gallery-4','venues/mexicola-locale/gallery-5','venues/mexicola-locale/gallery-6','venues/mexicola-locale/gallery-7']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('u','The Loft','Arcade bar','drink',186,340,4.1,76,'venues/the-loft/hero','Retro arcade night, Thursdays','Locals'' offer: Retro arcade night, Thursdays. Sample.','31 Harbour Road',null,null,'venues/the-loft/logo',array['venues/the-loft/gallery-1','venues/the-loft/gallery-2']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('g','Dario''s Cafe','Restaurant','eat',286,414,4.4,85,'venues/darios/hero',null,null,'30 Main Road','https://www.darioscafe.co.za',null,'venues/darios/logo',array['venues/darios/gallery-1','venues/darios/gallery-2']::text[]) on conflict (id) do nothing;
+insert into venues(id,name,kind,cat,x,y,score,trust,img,blurb,deal,address,website,instagram,logo,gallery) values('s','Sherley''s','Bar','drink',338,326,3.9,70,'venues/sherleys/hero',null,null,null,null,null,null,array[]::text[]) on conflict (id) do nothing;
+insert into events(id,venue_id,title,when_text,going,going_more,chip) values('e1','w','Quiz night','Third Monday of the month',array['ana','craig','daria']::text[],5,'Locals'' offer') on conflict (id) do nothing;
+insert into events(id,venue_id,title,when_text,going,going_more,chip) values('e2','l','Live music','Sunday afternoon',array['james','mischelle','philip']::text[],3,'New') on conflict (id) do nothing;
+insert into events(id,venue_id,title,when_text,going,going_more,chip) values('e3','b','Friday evening market','Friday 17:00 to 21:00, weekends by day',array['aedan','bryan','andre']::text[],2,'New') on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p1','person','ana','w','Quiz night with the usual crowd.','venues/woodcutters/hero','Verified visit',12,2,'Today',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p2','venue','l','l','Live music this Sunday from 14:00. Followers get a table held until 15:00.','venues/lookout/post','Locals'' offer',31,9,'2h',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p3','person','daria','d','Quiet afternoon and friendly staff.',null,'Verified visit',7,0,'Yesterday',4) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p4','venue','b','b','Friday evening market is back. Live music from 17:00.',null,'Venue',18,5,'Yesterday',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p5','person','craig','g','Best calamari on the bay. Ask for it with the lemon butter.','venues/darios/hero','Verified visit',9,1,'2d',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p7','venue','w','w','All day Saturday special: burger or ribs. Sample offer.','venues/woodcutters/post','Locals'' offer',18,3,'1d',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p8','venue','m','m','Fresh seafood on the harbour front. Sample post.','venues/mariners-wharf/post',null,9,1,'2d',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p9','venue','x','x','Live music nights at Massimo''s. Sample post.','venues/massimos/post',null,14,2,'3d',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p10','person','christian','z','Out at the Beach Bar.','people/christian/photo-01','Verified visit',11,1,'3h',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p11','person','christian','w','Catching up at Woodcutters.','people/christian/photo-06','Verified visit',8,0,'1d',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p12','person','christian','b','Market buzz on a busy day.','people/christian/photo-10','Verified visit',6,1,'2d',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p13','person','christian','q','Dinner at Mexicola Locale.','people/christian/photo-13','Verified visit',7,0,'4d',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p14','person','christian','s','Drinks at Sherley''s.','people/christian/photo-14','Verified visit',5,0,'5d',null) on conflict (id) do nothing;
+insert into posts(id,author_kind,author_id,venue_id,body,photo,chip,likes,reps,at_text,rating) values('p15','person','christian','l','Lunch at the Lookout Deck.','people/christian/photo-15','Verified visit',9,1,'6d',null) on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r1','w','ana',5,'Great spot, will be back. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r2','w','daria',4,'Quiet midweek, easy parking. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r3','l','craig',5,'Good value for locals. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r4','l','james',4,'Lovely sunset view. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r5','b','mischelle',5,'Friendly staff and a fair price. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r6','b','aedan',4,'Great spot, will be back. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r7','d','philip',5,'Quiet midweek, easy parking. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r8','d','andre',4,'Good value for locals. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r9','f','bryan',5,'Lovely sunset view. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r10','f','christian',4,'Friendly staff and a fair price. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r11','m','wobyn',5,'Great spot, will be back. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r12','m','ana',4,'Quiet midweek, easy parking. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r13','h','daria',5,'Good value for locals. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r14','h','craig',4,'Lovely sunset view. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r15','x','james',5,'Friendly staff and a fair price. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r16','x','mischelle',4,'Great spot, will be back. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r17','c','aedan',5,'Quiet midweek, easy parking. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r18','c','philip',4,'Good value for locals. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r21','y','christian',5,'Great spot, will be back. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r22','y','wobyn',4,'Quiet midweek, easy parking. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r25','o','craig',5,'Friendly staff and a fair price. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r26','o','james',4,'Great spot, will be back. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r27','r','mischelle',5,'Quiet midweek, easy parking. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r28','r','aedan',4,'Good value for locals. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r29','v','philip',5,'Lovely sunset view. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r30','v','andre',4,'Friendly staff and a fair price. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r31','z','bryan',5,'Great spot, will be back. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r32','z','christian',4,'Quiet midweek, easy parking. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r33','q','wobyn',5,'Good value for locals. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r34','q','ana',4,'Lovely sunset view. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r35','u','daria',5,'Friendly staff and a fair price. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r36','u','craig',4,'Great spot, will be back. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r37','g','james',5,'Quiet midweek, easy parking. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r38','g','mischelle',4,'Good value for locals. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r39','s','aedan',5,'Lovely sunset view. Sample.') on conflict (id) do nothing;
+insert into reviews(id,venue_id,person_id,rating,body) values('r40','s','philip',4,'Friendly staff and a fair price. Sample.') on conflict (id) do nothing;
