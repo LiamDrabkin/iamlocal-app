@@ -82,5 +82,11 @@
     "lng": 18.356506,
     "match": "Main Road, Kronendal Retirement Village, Cape Town Ward 74, Hout Bay, City of Cape Town, Western Cape, 7872, South Africa",
     "query": "30 Main Road, Hout Bay"
+  },
+  "b": {
+    "lat": -34.044411,
+    "lng": 18.350765,
+    "match": "Set by hand: same spot as The Loft",
+    "query": "manual"
   }
 }
