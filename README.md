@@ -15,3 +15,17 @@ Public read only (RLS). Visitor follows/likes/posts live in each browser's local
 
 ## Privacy
 public/img contains team photos. Turn on Vercel Deployment Protection (or share only with the team) before sharing widely.
+
+## Maps
+
+One map component (`components/MapSurface.tsx`) picks a provider and lazy-loads only that one.
+
+| Provider | Needs | Notes |
+|---|---|---|
+| `maplibre` (default) | nothing | OpenStreetMap data via OpenFreeMap. Pin editor at `/map?edit=1` |
+| `google` | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAP_ID` | Restrict the key by HTTP referrer and to the Maps JavaScript API |
+| `stylised` | nothing | The hand-drawn illustration |
+
+Set the default with `NEXT_PUBLIC_MAP_PROVIDER`. Outside production you can flip live with the switch on the map page, or open `/map?map=google` (remembered per browser). Production always uses the default.
+
+Add a provider: create `components/map/<Name>Surface.tsx` taking `MapSurfaceProps` (`components/map/types.ts`), add it to `PROVIDERS` in `components/map/provider.ts`, and register it in `components/MapSurface.tsx`.

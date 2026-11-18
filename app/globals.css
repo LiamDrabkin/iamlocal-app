@@ -180,3 +180,8 @@ label { font-size: 13px; font-weight: 700; }
 .gmap .pinw { position: relative; left: auto; top: auto; will-change: transform; }
 .gmap .pin2 img { width: var(--pin, 52px); height: var(--pin, 52px); }
 .gmap .pinw.nonames:not(.sel) .pn { display: none; }
+
+/* Map provider switch (test builds only). Sits over the map's top centre, clear of the zoom control and pin editor. */
+.mapwrap { position: relative; }
+.mapsw { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 7; display: flex; gap: 4px; padding: 4px; background: var(--bg); border: 2px solid var(--ink); border-radius: 999px; }
+.mapsw .tog { min-height: 44px; padding: 0 12px; font-size: 13px; }

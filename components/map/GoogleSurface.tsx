@@ -1,9 +1,9 @@
 'use client';
 /**
- * MapSurface, Google Maps version (branch map/google). Same contract as the other map branches:
+ * Google Maps implementation of the map contract (components/map/types.ts):
  * show `venues`, mark `sel`, call `onSelect(id | null)`. `hereBy` maps a venue id to the people I follow
- * who are there now (place only, never a position). This is the ONLY file that differs between the map
- * branches, so the page, cards and face stacks stay identical and the comparison is fair.
+ * who are there now (place only, never a position). The map implementations are interchangeable, so the
+ * page, cards and face stacks stay identical and the comparison is fair.
  *
  * Pins are AdvancedMarkers (needs a vector Map ID) whose content is the same HTML pin the other branches
  * use. Google owns each marker's position; we only add a small pixel nudge so pins do not overlap.
@@ -16,19 +16,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { APIProvider, AdvancedMarker, AdvancedMarkerAnchorPoint, Map as GoogleMap, useMap } from '@vis.gl/react-google-maps';
 import FaceStack from '@/components/FaceStack';
+import { CAT_LABEL, type MapSurfaceProps } from '@/components/map/types';
 import { HOUT_BAY_CENTER, venueLatLng } from '@/lib/geo';
 import { centreForOffset, latLngToViewport } from '@/lib/mercator';
 import { spreadPins } from '@/lib/spread';
-import { pinImg, type Cat, type Venue } from '@/lib/types';
-
-export interface MapSurfaceProps {
-  venues: Venue[];
-  sel: string | null;
-  onSelect: (id: string | null) => void;
-  hereBy: Map<string, string[]>;
-}
-
-export const CAT_LABEL: Record<Cat, string> = { eat: 'Eat', drink: 'Drink', do: 'Do' };
+import { pinImg, type Venue } from '@/lib/types';
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 const MAP_ID = process.env.NEXT_PUBLIC_GOOGLE_MAP_ID;
@@ -64,7 +56,7 @@ function useDarkTheme() {
   return dark;
 }
 
-export default function MapSurface({ venues, sel, onSelect, hereBy }: MapSurfaceProps) {
+export default function GoogleSurface({ venues, sel, onSelect, hereBy }: MapSurfaceProps) {
   const dark = useDarkTheme();
   // Used once, to frame the opening view; later changes to the filtered list must not move the camera.
   const [opening] = useState(() => openingBounds(venues));
