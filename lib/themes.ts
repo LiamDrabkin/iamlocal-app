@@ -11,6 +11,8 @@ export type ThemeId =
   | 'night' | 'night-market' | 'night-harbour'
   | 'x-lilac' | 'x-mono' | 'x-ink' | 'x-plum';
 
+import type { MoodId } from './moods';
+
 export type Mode = 'light' | 'dark';
 
 export interface ThemeDef {
@@ -60,4 +62,15 @@ export function resolveTheme(st: ThemeState, prefersDark: boolean): { id: ThemeI
   else id = st.theme;
   if (!MODE[id] || (!showExperiments && THEMES.find((t) => t.id === id)?.experiment)) id = MODE[id] === 'dark' ? DEFAULT_DARK : DEFAULT_LIGHT;
   return { id, mode: MODE[id] };
+}
+
+/**
+ * Redesign branch: a "mood" (lib/moods.ts) sits on top of light/dark. With a mood other than 'classic',
+ * the mode comes from the phone ('system'), an explicit 'light'/'dark', or the mode of a picked classic
+ * theme, and no skin is applied. 'classic' keeps the original skin behaviour via resolveTheme().
+ */
+export function resolveLook(st: ThemeState & { mood: MoodId }, prefersDark: boolean): { mood: MoodId; mode: Mode; skin: ThemeId | null } {
+  if (st.mood === 'classic') { const r = resolveTheme(st, prefersDark); return { mood: 'classic', mode: r.mode, skin: r.id }; }
+  const mode: Mode = st.theme === 'system' ? (prefersDark ? 'dark' : 'light') : st.theme === 'light' || st.theme === 'dark' ? st.theme : (MODE[st.theme] ?? 'light');
+  return { mood: st.mood, mode, skin: null };
 }

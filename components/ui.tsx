@@ -76,8 +76,9 @@ export function Tabs() {
 }
 
 /** Page frame used by every main screen. */
-export function Shell({ children, tabs = true }: { children: ReactNode; tabs?: boolean }) {
-  return (<div className="app">{children}{tabs && <Tabs />}</div>);
+/** App frame. The two art layers are driven by the active mood's CSS variables (app/moods.css); `hero` is the Welcome page. */
+export function Shell({ children, tabs = true, hero = false }: { children: ReactNode; tabs?: boolean; hero?: boolean }) {
+  return (<div className={hero ? 'app hero' : 'app'}><div className="art-h" aria-hidden="true" /><div className="art-s" aria-hidden="true" />{children}{tabs && <Tabs />}</div>);
 }
 
 export const SampleNote = ({ children }: { children?: ReactNode }) => (
