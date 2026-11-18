@@ -176,3 +176,7 @@ label { font-size: 13px; font-weight: 700; }
 
 /* Pin editor panel (map branches, /map?edit=1) */
 .rpanel { position: absolute; top: 8px; right: 8px; z-index: 6; width: 190px; background: var(--bg); border: 2px solid var(--ink); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+/* Real map (Google). The marker owns the pin's position; the .pinw wrapper only carries the spacing nudge. */
+.gmap .pinw { position: relative; left: auto; top: auto; will-change: transform; }
+.gmap .pin2 img { width: var(--pin, 52px); height: var(--pin, 52px); }
+.gmap .pinw.nonames:not(.sel) .pn { display: none; }
