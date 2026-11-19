@@ -6,6 +6,7 @@ import { Back, Chip, Shell } from '@/components/ui';
 import { shrinkImage } from '@/lib/image';
 import { useApp } from '@/lib/store';
 import { img } from '@/lib/types';
+import { FEATURES } from '@/lib/features';
 
 export default function EditProfile() {
   const { s, set, me, data, venue, has } = useApp();
@@ -56,11 +57,13 @@ export default function EditProfile() {
           <button className="btn" onClick={() => set({ profile: { ...s.profile, bio } })}>Save bio</button>
         </div>
 
-        <div className="card">
-          <h2>Posts</h2>
-          <p>Create a post from a place you have a confirmed visit at.</p>
-          <Link className="btn s" href="/feed">Write a post</Link>
-        </div>
+        {FEATURES.social && (
+          <div className="card">
+            <h2>Posts</h2>
+            <p>Create a post from a place you have a confirmed visit at.</p>
+            <Link className="btn s" href="/feed">Write a post</Link>
+          </div>
+        )}
 
         <h2>On now at your favourites</h2>
         {deals.length === 0 && <p>No current deals.</p>}

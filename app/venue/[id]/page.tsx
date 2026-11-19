@@ -6,6 +6,7 @@ import FaceStack from '@/components/FaceStack';
 import { Back, Chip, Faces, I, Icon, PersonAv, SampleNote, Shell } from '@/components/ui';
 import { useApp } from '@/lib/store';
 import { ME, img, type Review } from '@/lib/types';
+import { FEATURES } from '@/lib/features';
 
 export default function VenuePage() {
   const { id } = useParams<{ id: string }>();
@@ -93,7 +94,9 @@ export default function VenuePage() {
           {reviews.length === 0 && <p>No reviews yet.</p>}
           {reviews.map((r) => { const p = person(r.personId); return (
             <div className="card" key={r.id}><div className="row"><PersonAv p={p} />
-              <Link href={`/profile/${p.id}`} className="col link"><h3>{p.name}</h3><p className="sm">{r.rating} of 5</p></Link><Chip tone="calm">Verified visit</Chip></div><p>{r.text}</p></div>
+              {FEATURES.social
+                ? <Link href={`/profile/${p.id}`} className="col link"><h3>{p.name}</h3><p className="sm">{r.rating} of 5</p></Link>
+                : <div className="col"><h3>{p.name}</h3><p className="sm">{r.rating} of 5</p></div>}<Chip tone="calm">Verified visit</Chip></div><p>{r.text}</p></div>
           ); })}
         </>)}
 
@@ -139,7 +142,7 @@ export default function VenuePage() {
           <div className="card" key={p.id}>
             <div className="row"><div className="col"><h3>{v.name}</h3><p className="sm">Venue you follow · {p.at}</p></div>{p.chip && <Chip tone="rw">{p.chip}</Chip>}</div>
             <p style={{ color: 'var(--ink)' }}>{p.text} [sample post]</p>
-            <div className="row"><Link className="tog" href="/feed">See in feed</Link><Chip>Seen only by followers</Chip></div>
+            <div className="row">{FEATURES.social && <Link className="tog" href="/feed">See in feed</Link>}<Chip>Seen only by followers</Chip></div>
           </div>
         )) : <div className="card"><h3>Posts are for followers</h3><p>Follow {v.name} to see its posts and alerts. The owner never sends marketing to people who do not follow.</p></div>}
         {following && posts.length === 0 && <p>No posts from this venue yet.</p>}

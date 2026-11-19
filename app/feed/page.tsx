@@ -1,11 +1,19 @@
 'use client';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { useState } from 'react';
 import { Chip, I, Icon, SampleNote, Shell } from '@/components/ui';
 import { useApp } from '@/lib/store';
 import { ME, img, type Post } from '@/lib/types';
+import { FEATURES } from '@/lib/features';
 
-export default function Feed() {
+/** The social feed. Off on production: the route returns 404 (lib/features.ts). */
+export default function FeedRoute() {
+  if (!FEATURES.social) notFound();
+  return <Feed />;
+}
+
+function Feed() {
   const { data, s, set, flip, has, person, venue, me } = useApp();
   const [composing, setComposing] = useState(false);
   const [text, setText] = useState('Quiet Tuesday and a warm welcome.');

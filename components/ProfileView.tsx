@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Back, Chip, Faces, Icon, I, PersonAv, SampleNote, Shell, VenueImg } from '@/components/ui';
 import { useApp } from '@/lib/store';
 import { ME, img, type Level } from '@/lib/types';
+import { FEATURES } from '@/lib/features';
 
 const LADDER: Level[] = ['Visitor', 'Active', 'Local', 'Regular'];
 
@@ -12,12 +13,24 @@ export default function ProfileView({ id }: { id: string }) {
   const { data, s, flip, has, person, venue } = useApp();
   const p = person(id);
   const mine = id === ME;
-  const [tab, setTab] = useState<'places' | 'people' | 'posts'>('places');
+  const [tab, setTab] = useState<'places' | 'people' | 'posts' | 'reviews'>('places');
 
   const reviews = [...(mine ? s.myReviews : []), ...data.reviews.filter((r) => r.personId === id)];
   const following = data.people.filter((x) => x.id !== id && (mine ? s.following.includes(x.id) : x.recent.some((r) => p.recent.includes(r))));
   const posts = [...(mine ? s.myPosts : []), ...data.posts.filter((x) => x.authorKind === 'person' && x.authorId === id)];
   const deals = data.events.filter((e) => has('alerts', e.venueId));
+
+  /** Reviews, one per confirmed visit. Shown in the Posts tab (social) or its own Reviews tab (production). */
+  const reviewsBlock = (
+    <>
+          <h2>Reviews</h2>
+          {reviews.length === 0 && <p>No reviews yet.</p>}
+          {reviews.map((r) => (
+            <Link key={r.id} href={`/venue/${r.venueId}`} className="card"><div className="row sp"><h3>{venue(r.venueId).name}</h3><Chip>{r.rating} of 5</Chip></div><p>{r.text}</p></Link>
+          ))}
+          <div className="sample">One review per confirmed visit. Venues can reply.</div>
+    </>
+  );
 
   return (
     <Shell>
@@ -50,7 +63,10 @@ export default function ProfileView({ id }: { id: string }) {
         <SampleNote />
 
         <div className="seg" role="tablist" aria-label="Profile sections">
-          {([['places', 'Places'], ['people', mine ? 'People' : 'Overlap'], ['posts', 'Posts']] as const).map(([k, l]) => (
+          {(FEATURES.social
+            ? ([['places', 'Places'], ['people', mine ? 'People' : 'Overlap'], ['posts', 'Posts']] as const)
+            : ([['places', 'Places'], ['reviews', 'Reviews']] as const)
+          ).map(([k, l]) => (
             <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
           ))}
         </div>
@@ -61,6 +77,8 @@ export default function ProfileView({ id }: { id: string }) {
             <Link key={vid} href={`/venue/${vid}`} className="card"><div className="row"><VenueImg v={v} cls="thumb" /><div className="col"><h3>{v.name}</h3><p className="sm">{mine && !has('visits', vid) && vid === 'w' ? 'Visit confirmed' : 'Visit confirmed'} [sample]</p></div><Chip tone="calm">Verified</Chip></div></Link>
           ); })}
         </>)}
+
+        {tab === 'reviews' && reviewsBlock}
 
         {tab === 'posts' && (<>
           {p.photos?.length ? (<>
@@ -82,12 +100,7 @@ export default function ProfileView({ id }: { id: string }) {
               )}
             </div>
           ))}
-          <h2>Reviews</h2>
-          {reviews.length === 0 && <p>No reviews yet.</p>}
-          {reviews.map((r) => (
-            <Link key={r.id} href={`/venue/${r.venueId}`} className="card"><div className="row sp"><h3>{venue(r.venueId).name}</h3><Chip>{r.rating} of 5</Chip></div><p>{r.text}</p></Link>
-          ))}
-          <div className="sample">One review per confirmed visit. Venues can reply.</div>
+          {reviewsBlock}
         </>)}
 
         {tab === 'people' && (<>

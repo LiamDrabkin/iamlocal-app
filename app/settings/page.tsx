@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { visibleThemes } from '@/lib/themes';
 import { MOODS } from '@/lib/moods';
 import { useApp, type Local } from '@/lib/store';
+import { COPY } from '@/lib/features';
 
 /** Platforms a member could link. Mock-up only: linking just records the choice. */
 const PLATFORMS = ['Instagram', 'Facebook', 'TikTok', 'X'];
@@ -29,10 +30,10 @@ export default function Settings() {
             <h2>Account</h2>
             {user ? (<>
               <p>{user.email}</p>
-              <p className="sm">Your follows, likes, posts and settings are saved to your account.</p>
+              <p className="sm">Your {COPY.saved} are saved to your account.</p>
               <button className="btn s" onClick={() => void signOut()}>Sign out</button>
             </>) : (<>
-              <p className="sm">Not signed in. Your follows, likes, posts and settings are saved only in this browser.</p>
+              <p className="sm">Not signed in. Your {COPY.saved} are saved only in this browser.</p>
               <Link className="btn" href="/signin">Sign in or create account</Link>
             </>)}
           </div>
@@ -110,8 +111,8 @@ export default function Settings() {
         <div className="sample">Sign-in is by emailed link for now. Google, Apple and phone-number sign-in are still to be decided.</div>
         <div className="card">
           <h2>About this mock-up</h2>
-          <p className="sm">Data source: {data.source === 'supabase' ? 'Supabase' : 'built-in sample data'}. {user ? 'Your data is saved to your account.' : 'Your follows, likes, posts and settings are saved only in this browser.'}</p>
-          <button className="btn s" onClick={() => { if (confirm('Reset your follows, posts and settings on this device?')) reset(); }}>Reset demo on this device</button>
+          <p className="sm">Data source: {data.source === 'supabase' ? 'Supabase' : 'built-in sample data'}. {user ? 'Your data is saved to your account.' : `Your ${COPY.saved} are saved only in this browser.`}</p>
+          <button className="btn s" onClick={() => { if (confirm(`Reset your ${COPY.saved} on this device?`)) reset(); }}>Reset demo on this device</button>
         </div>
       </div>
     </Shell>

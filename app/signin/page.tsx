@@ -5,6 +5,7 @@ import { Suspense, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Back, Shell } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { COPY } from '@/lib/features';
 
 function SignInForm() {
   const { enabled, user, signIn, signOut } = useAuth();
@@ -25,7 +26,7 @@ function SignInForm() {
     <div className="card">
       <h2>You are signed in</h2>
       <p>{user.email}</p>
-      <p className="sm">Your follows, likes, posts and settings are saved to your account.</p>
+      <p className="sm">Your {COPY.saved} are saved to your account.</p>
       <Link className="btn" href="/favourites">Continue</Link>
       <button className="btn s" onClick={() => void signOut()}>Sign out</button>
     </div>
@@ -58,7 +59,7 @@ export default function SignIn() {
       <div className="sc">
         <Back href="/welcome">Back</Back>
         <h1>Sign in</h1>
-        <p>Save your follows, likes and posts to an account, so they follow you across devices.</p>
+        <p>Save your {COPY.savedShort} to an account, so they follow you across devices.</p>
         <Suspense fallback={null}><SignInForm /></Suspense>
         <p className="sm" style={{ textAlign: 'center' }}><Link href="/favourites" style={{ textDecoration: 'underline' }}>Keep looking around without an account</Link></p>
       </div>

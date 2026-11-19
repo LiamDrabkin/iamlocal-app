@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useApp } from '@/lib/store';
 import { img } from '@/lib/types';
+import { FEATURES } from '@/lib/features';
 
 interface Props {
   ids: string[];
@@ -18,6 +19,13 @@ interface Props {
   popover?: boolean;
   /** Extra people not listed by id, for example "and 5 more going". */
   more?: number;
+}
+
+/** One row in the popover: a link to the profile when the social layer is on, plain text otherwise. */
+function Who({ id, children }: { id: string; children: React.ReactNode }) {
+  return FEATURES.social
+    ? <Link role="listitem" href={`/profile/${id}`} className="row" onClick={(e) => e.stopPropagation()}>{children}</Link>
+    : <div role="listitem" className="row">{children}</div>;
 }
 
 export default function FaceStack({ ids, max = 3, popover = false, more = 0 }: Props) {
@@ -39,11 +47,11 @@ export default function FaceStack({ ids, max = 3, popover = false, more = 0 }: P
       {open && (
         <div className="fsx" role="list">
           {ids.map((id) => (
-            <Link key={id} role="listitem" href={`/profile/${id}`} className="row" onClick={(e) => e.stopPropagation()}>
+            <Who key={id} id={id}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="av sm" src={img(person(id).avatar)} alt="" />
               <span>{person(id).name}</span>
-            </Link>
+            </Who>
           ))}
           {more > 0 && <p className="sm">and {more} more</p>}
         </div>

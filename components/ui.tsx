@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { img, type Person, type Venue } from '@/lib/types';
 import { useApp } from '@/lib/store';
+import { FEATURES } from '@/lib/features';
 
 export const Icon = ({ d, fill }: { d: string; fill?: boolean }) => (
   <svg className="ic" viewBox="0 0 24 24" aria-hidden="true" style={fill ? { fill: 'currentColor' } : undefined}><path d={d} /></svg>
@@ -24,13 +25,11 @@ export function Chip({ children, tone }: { children: ReactNode; tone?: 'calm' | 
   return <span className={`chip ${tone ?? ''}`}>{children}</span>;
 }
 
+/** A person's avatar. Links to their profile only when the social layer is on; otherwise it is just a picture. */
 export function PersonAv({ p, cls = '' }: { p: Person; cls?: string }) {
-  return (
-    <Link href={`/profile/${p.id}`} aria-label={`${p.name}'s profile`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className={`av ${cls}`} src={img(p.avatar)} alt={p.name} />
-    </Link>
-  );
+  // eslint-disable-next-line @next/next/no-img-element
+  const pic = <img className={`av ${cls}`} src={img(p.avatar)} alt={p.name} />;
+  return FEATURES.social ? <Link href={`/profile/${p.id}`} aria-label={`${p.name}'s profile`}>{pic}</Link> : pic;
 }
 
 export function VenueImg({ v, cls = 'thumb' }: { v: Venue; cls?: string }) {
@@ -60,14 +59,14 @@ export function Back({ href, children }: { href: string; children: ReactNode }) 
   return <Link className="back" href={href}>{children}</Link>;
 }
 
-/** Bottom tab bar: Favourites, Feed, [Doorway], Map, Profile. Settings opens from the gear in Profile. */
+/** Bottom tab bar: Favourites, Feed (social only), Doorway, Map, Profile. Settings opens from the gear in Profile. */
 export function Tabs() {
   const path = usePathname();
   const on = (p: string) => (path === p || path.startsWith(p + '/') ? 'on' : '');
   return (
-    <nav className="tabs" aria-label="Main">
+    <nav className={`tabs ${FEATURES.social ? '' : 'flat'}`} aria-label="Main">
       <Link className={on('/favourites')} href="/favourites"><Icon d={I.heart} />Favourites</Link>
-      <Link className={on('/feed')} href="/feed"><Icon d={I.feed} />Feed</Link>
+      {FEATURES.social && <Link className={on('/feed')} href="/feed"><Icon d={I.feed} />Feed</Link>}
       <Link href="/doorway" aria-label="Show my membership"><span className="c"><svg className="ic" viewBox="0 0 24 24" aria-hidden="true" style={{ width: 28, height: 28 }}><path d="M6 20V11a6 6 0 0 1 12 0v9" /><circle cx="12" cy="16" r="1.6" fill="currentColor" /></svg></span></Link>
       <Link className={on('/map')} href="/map"><Icon d={I.pin} />Map</Link>
       <Link className={on('/profile') || on('/settings')} href="/profile"><svg className="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d={I.user} /></svg>Profile</Link>
